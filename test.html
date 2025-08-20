@@ -152,6 +152,10 @@
                 return;
             }
             
+            // Save to localStorage
+            localStorage.setItem('currentActivity', activity);
+            localStorage.setItem('currentTime', timeInput);
+            
             if (activity === 'test') {
                 // Convert to 12-hour format for test alert
                 let [hours, minutes] = timeInput.split(':');
@@ -177,9 +181,11 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    document.getElementById('uploadedImage').src = event.target.result;
+                    const imageData = event.target.result;
+                    document.getElementById('uploadedImage').src = imageData;
                     document.getElementById('uploadedImageContainer').classList.remove('hidden');
                     document.getElementById('imagePlaceholder').classList.add('hidden');
+                    localStorage.setItem('currentImage', imageData);
                 };
                 reader.readAsDataURL(file);
             }
@@ -190,6 +196,7 @@
             document.getElementById('uploadedImageContainer').classList.add('hidden');
             document.getElementById('imagePlaceholder').classList.remove('hidden');
             document.getElementById('imageUpload').value = '';
+            localStorage.removeItem('currentImage');
         });
         
         // View toggle functionality
@@ -234,14 +241,33 @@
         // Initialize
         updateDate();
         
-        // Set default time to current time in 12-hour format
-        const now = new Date();
-        let hours = now.getHours();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        document.getElementById('startTime').value = `${hours}:${minutes}`;
+        // Load saved data from localStorage
+        const savedActivity = localStorage.getItem('currentActivity');
+        const savedTime = localStorage.getItem('currentTime');
+        const savedImage = localStorage.getItem('currentImage');
+        
+        if (savedActivity) {
+            document.getElementById('activity').value = savedActivity;
+        }
+        
+        if (savedTime) {
+            document.getElementById('startTime').value = savedTime;
+        } else {
+            // Set default time to current time in 12-hour format
+            const now = new Date();
+            let hours = now.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('startTime').value = `${hours}:${minutes}`;
+        }
+        
+        if (savedImage) {
+            document.getElementById('uploadedImage').src = savedImage;
+            document.getElementById('uploadedImageContainer').classList.remove('hidden');
+            document.getElementById('imagePlaceholder').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
